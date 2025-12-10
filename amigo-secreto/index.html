@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Amigo Secreto</title>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" integrity="sha512-CNgIRecGo7nphbeZ04Sc13ka07paqdeTu0WR1IM4kNcpmBAUSHSQX0FslNhTDadL4O5SAGapGt4FodqL8My0mA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/3.0.3/jspdf.umd.min.js" integrity="sha512-+EeCylkt9WHJk5tGJxYdecHOcXFRME7qnbsfeMsdQL6NUPYm2+uGFmyleEqsmVoap/f3dN/sc3BX9t9kHXkHHg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+</head>
+<body>
+
+<div>
+    <form>
+        <label for="nome">Nome: </label>
+        <input id="nome" type="text" />
+        <button name="submit" id="adicionar">Adicionar</button>
+    </form>
+</div>
+
+<div>
+    <ul id="pessoas"></ul>
+</div>
+
+<div>
+    <button id="sortear">Sortear</button>
+</div>
+
+<p></p>
+
+<div id="resultado"></div>
+
+</body>
+
+<script>
+    const { jsPDF } = window.jspdf;
+
+    let pessoas = [];
+    function onLoad() {
+        document.getElementById('adicionar').onclick = evt => {
+            evt.preventDefault();
+            const nome = document.getElementById('nome').value.trim();
+            if (nome && pessoas.indexOf(nome) === -1) {
+                pessoas.push(nome);
+                document.getElementById('nome').value = '';
+            }
+
+            redesenharTela();
+        };
+
+        document.getElementById('sortear').onclick = evt => {
+          evt.preventDefault();
+          sortear();
+        };
+
+        redesenharTela();
+    }
+
+    function removerPessoa(index) {
+        pessoas.splice(index, 1);
+        redesenharTela();
+    }
+
+    function sortear() {
+        let resultado;
+
+        let valeu = false;
+        while (!valeu) {
+            resultado = [];
+
+            let amigos = [...pessoas];
+            for (let pessoa of pessoas) {
+                const amigosMenosPessoa = [...amigos].filter(amigo => amigo !== pessoa);
+                if (amigosMenosPessoa.length === 0) {
+                    break;
+                }
+                const rand = Math.floor(Math.random() * amigosMenosPessoa.length);
+                const amigoSecreto = amigosMenosPessoa[rand];
+                const qrcode = document.createElement('div');
+                new QRCode(qrcode, removerAcentos(amigoSecreto));
+                const img = qrcode.getElementsByTagName('img');
+                resultado.push({
+                    pessoa,
+                    amigoSecreto,
+                    qrcode: img[0]
+                });
+
+                amigos = amigos.filter(amigo => amigo !== amigoSecreto);
+            }
+            if (amigos.length === 0) {
+                valeu = true;
+            }
+        }
+
+        setTimeout(function aguardarQrCodes() {
+            for (const r of resultado) {
+                if (!r.qrcode.src) {
+                    setTimeout(aguardarQrCodes, 100);
+                    return;
+                }
+            }
+            gerarPdf(resultado);
+        }, 100);
+    }
+
+    function gerarPdf(resultado) {
+        document.getElementById('resultado').innerText = '';
+        const doc = new jsPDF();
+        const margin = 13;
+        const qrcodeSize = 20;
+        const lineHeight = 8;
+        const columnWidth = 75;
+        const boxHeight = (lineHeight * 3) + qrcodeSize;
+        let y = margin;
+        let count = 0;
+        let column = 0;
+        for (let r of resultado) {
+            doc.text(`${r.pessoa}:`, margin + columnWidth * column, y);
+            doc.addImage(r.qrcode.src, 'png', margin + columnWidth * column, y + lineHeight, qrcodeSize, qrcodeSize);
+            y += boxHeight;
+            count++;
+
+            if (count === 6) {
+                count = 0;
+                y = margin;
+                column++;
+
+                if (column === 3) {
+                    column = 0;
+                    doc.addPage();
+                }
+            }
+        }
+        doc.save('amigo-secreto.pdf');
+    }
+
+    function redesenharTela() {
+        const pessoasList = document.getElementById('pessoas');
+
+        const items = pessoas.map((pessoa, idx) => {
+            const li = document.createElement('li');
+            li.innerText = `${pessoa} `;
+            const excluir = document.createElement('a');
+            excluir.href = '#';
+            excluir.innerText = '(remover)';
+            excluir.onclick = evt => {
+                evt.preventDefault();
+                removerPessoa(idx);
+            } ;
+            li.appendChild(excluir);
+            return li;
+        });
+
+        pessoasList.innerHTML = '';
+        for (const element of items) {
+            pessoasList.appendChild(element);
+        }
+
+        const botaoSortear = document.getElementById('sortear');
+        botaoSortear.disabled = pessoas.length > 1 ? '' : 'disabled';
+    }
+
+    function removerAcentos(str) {
+        return str
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, "");
+    }
+
+    window.onload = onLoad;
+</script>
+</html>
