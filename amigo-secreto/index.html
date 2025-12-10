@@ -134,7 +134,8 @@
                 }
             }
         }
-        doc.save('amigo-secreto.pdf');
+        // doc.save('amigo-secreto.pdf');
+        window.open(doc.output('bloburl'), '_blank');
     }
 
     function redesenharTela() {
