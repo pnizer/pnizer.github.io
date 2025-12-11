@@ -9,7 +9,11 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" integrity="sha512-CNgIRecGo7nphbeZ04Sc13ka07paqdeTu0WR1IM4kNcpmBAUSHSQX0FslNhTDadL4O5SAGapGt4FodqL8My0mA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/3.0.3/jspdf.umd.min.js" integrity="sha512-+EeCylkt9WHJk5tGJxYdecHOcXFRME7qnbsfeMsdQL6NUPYm2+uGFmyleEqsmVoap/f3dN/sc3BX9t9kHXkHHg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.3.1/pdfobject.min.js" integrity="sha512-okdYHqKDXlxPqa15xRbGTv/Dg6TxskmMjtQWlIDMFbblo9/M2uPNowgmBuiDcGMfkE6pWtqPr9PuEWsTPyKWAw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
+    <style>
+        .pdfobject-container { height: 500px; border: 1px solid #ccc; }
+    </style>
 </head>
 <body>
 
@@ -107,7 +111,6 @@
     }
 
     function gerarPdf(resultado) {
-        document.getElementById('resultado').innerText = '';
         const doc = new jsPDF();
         const margin = 13;
         const qrcodeSize = 20;
@@ -134,8 +137,8 @@
                 }
             }
         }
-        // doc.save('amigo-secreto.pdf');
-        window.open(doc.output('bloburl'), '_blank');
+
+        PDFObject.embed(doc.output('bloburl'), "#resultado");
     }
 
     function redesenharTela() {
