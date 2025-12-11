@@ -7,36 +7,310 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Amigo Secreto</title>
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js" integrity="sha512-pUhApVQtLbnpLtJn6DuzDD5o2xtmLJnJ7oBoMsBnzOkVkpqofGLGPaBJ6ayD2zQe3lCgCibhJBi4cj5wAxwVKA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/3.0.3/jspdf.umd.min.js" integrity="sha512-+EeCylkt9WHJk5tGJxYdecHOcXFRME7qnbsfeMsdQL6NUPYm2+uGFmyleEqsmVoap/f3dN/sc3BX9t9kHXkHHg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.3.1/pdfobject.min.js" integrity="sha512-okdYHqKDXlxPqa15xRbGTv/Dg6TxskmMjtQWlIDMFbblo9/M2uPNowgmBuiDcGMfkE6pWtqPr9PuEWsTPyKWAw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
     <style>
-        .pdfobject-container { height: 500px; border: 1px solid #ccc; }
+        :root {
+            --bg: #f5f3ef;
+            --card-bg: #ffffff;
+            --card-border: #e4dfd7;
+            --accent: #c49a6c;
+            --accent-strong: #a77947;
+            --text: #26303d;
+            --muted: #6c7988;
+            --success: #1f6f78;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+            background: radial-gradient(circle at top, rgba(212, 191, 163, 0.25), transparent 60%), var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            padding: 32px 12px 64px;
+        }
+
+        .page {
+            width: min(1024px, 100%);
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 40px 24px 24px;
+        }
+
+        .hero h1 {
+            font-family: 'Playfair Display', 'Times New Roman', serif;
+            font-size: clamp(2.1rem, 4vw, 3rem);
+            margin: 0 0 8px;
+        }
+
+        .hero p {
+            margin: 0 auto;
+            max-width: 640px;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 18px;
+            padding: 24px;
+            box-shadow: 0 20px 60px rgba(38, 48, 61, 0.08);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+        }
+
+        .card h2 {
+            margin: 0 0 12px;
+            font-size: 1.25rem;
+        }
+
+        .participant-form {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .input-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        label {
+            font-size: 0.9rem;
+            color: var(--muted);
+        }
+
+        input[type="text"] {
+            padding: 12px 14px;
+            border-radius: 12px;
+            border: 1px solid var(--card-border);
+            font-size: 1rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(196, 154, 108, 0.15);
+        }
+
+        button {
+            border: none;
+            border-radius: 999px;
+            padding: 14px 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        button.primary {
+            background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+            color: #fff;
+            box-shadow: 0 12px 30px rgba(196, 154, 108, 0.35);
+        }
+
+        button.primary:disabled {
+            background: #d7cec3;
+            color: #fff;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        button.primary:not(:disabled):hover {
+            transform: translateY(-2px);
+        }
+
+        .participant-card {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .participant-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .pill {
+            padding: 4px 12px;
+            border-radius: 999px;
+            background: rgba(31, 111, 120, 0.1);
+            color: var(--success);
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        #pessoas {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        #pessoas li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 14px;
+            border-radius: 12px;
+            border: 1px solid var(--card-border);
+            background: #faf8f6;
+            font-weight: 500;
+        }
+
+        #pessoas li a {
+            font-size: 0.85rem;
+            color: var(--accent-strong);
+            text-decoration: none;
+        }
+
+        #pessoas li a:hover {
+            text-decoration: underline;
+        }
+
+        .empty-state {
+            margin: 0;
+            color: var(--muted);
+            font-size: 0.95rem;
+        }
+
+        .action-card {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+            text-align: center;
+        }
+
+        .action-card p {
+            margin: 0;
+            color: var(--muted);
+            max-width: 640px;
+        }
+
+        .result-card {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .result-card h2 {
+            margin-bottom: 0;
+        }
+
+        .pdf-placeholder {
+            margin: 0;
+            color: var(--muted);
+            font-style: italic;
+        }
+
+        #resultado {
+            min-height: 320px;
+            border: 1px dashed var(--card-border);
+            border-radius: 16px;
+            background: repeating-linear-gradient(135deg, rgba(206, 199, 189, 0.2) 0, rgba(206, 199, 189, 0.2) 12px, transparent 12px, transparent 24px);
+            display: none;
+            overflow: hidden;
+        }
+
+        #resultado.is-visible {
+            display: block;
+            border-style: solid;
+            background: #fff;
+        }
+
+        .pdfobject-container {
+            height: 500px;
+            border: none;
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding-top: 16px;
+            }
+
+            button {
+                width: 100%;
+            }
+
+            #pessoas li {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 4px;
+            }
+        }
     </style>
 </head>
 <body>
+<div class="page">
+    <header class="hero">
+        <h1>Amigo Secreto</h1>
+        <p>Organize o sorteio de forma elegante: adicione os participantes, confirme a lista e gere cartões individuais
+            com QR Code para revelar quem tirou quem.</p>
+    </header>
 
-<div>
-    <form>
-        <label for="nome">Nome: </label>
-        <input id="nome" type="text" />
-        <button name="submit" id="adicionar">Adicionar</button>
-    </form>
+    <main class="grid">
+        <section class="card">
+            <h2>Adicionar participante</h2>
+            <form class="participant-form">
+                <div class="input-wrapper">
+                    <label for="nome">Nome completo</label>
+                    <input id="nome" type="text" placeholder="Ex.: Ana Costa" autocomplete="off">
+                </div>
+                <button type="submit" name="submit" id="adicionar" class="primary">Adicionar à lista</button>
+            </form>
+        </section>
+
+        <section class="card participant-card">
+            <div class="participant-header">
+                <h2>Lista atual</h2>
+                <span class="pill" id="total-participantes">0 participantes</span>
+            </div>
+            <p class="empty-state" id="empty-state">Adicione pelo menos duas pessoas para habilitar o sorteio.</p>
+            <ul id="pessoas"></ul>
+        </section>
+    </main>
+
+    <section class="card action-card">
+        <p>Quando todos estiverem confirmados, clique para gerar os cartões de revelação. Cada pessoa receberá um QR Code
+            com o nome do seu amigo secreto.</p>
+        <button id="sortear" class="primary" disabled>Sortear amigos secretos</button>
+    </section>
+
+    <section class="card result-card">
+        <h2>Cartões individuais</h2>
+        <p class="pdf-placeholder" id="resultado-placeholder">Os cartões em PDF aparecerão aqui após o sorteio.</p>
+        <div id="resultado"></div>
+    </section>
 </div>
-
-<div>
-    <ul id="pessoas"></ul>
-</div>
-
-<div>
-    <button id="sortear">Sortear</button>
-</div>
-
-<p></p>
-
-<div id="resultado"></div>
-
 </body>
 
 <script>
@@ -128,7 +402,16 @@
             }
         }
 
-        PDFObject.embed(doc.output('bloburl'), "#resultado");
+        if (isMobile()) {
+            window.open(doc.output('bloburl'), '_blank');
+            revelarResultado({
+                mostrarContainer: false,
+                mensagem: 'Abrimos os cartões em uma nova aba. Caso não apareça, verifique o bloqueio de pop-ups.'
+            });
+        } else {
+            PDFObject.embed(doc.output('bloburl'), "#resultado");
+            revelarResultado({ mostrarContainer: true });
+        }
     }
 
     function redesenharTela() {
@@ -154,13 +437,41 @@
         }
 
         const botaoSortear = document.getElementById('sortear');
-        botaoSortear.disabled = pessoas.length > 1 ? '' : 'disabled';
+        botaoSortear.disabled = pessoas.length <= 2;
+
+        const totalParticipantes = document.getElementById('total-participantes');
+        totalParticipantes.innerText = `${pessoas.length} ${pessoas.length === 1 ? 'participante' : 'participantes'}`;
+
+        const emptyState = document.getElementById('empty-state');
+        emptyState.style.display = pessoas.length ? 'none' : 'block';
     }
 
     function removerAcentos(str) {
         return str
             .normalize('NFD')
             .replace(/[\u0300-\u036f]/g, "");
+    }
+
+    function isMobile() {
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i
+            .test(navigator.userAgent);
+    }
+
+    function revelarResultado({ mostrarContainer = true, mensagem } = {}) {
+        const placeholder = document.getElementById('resultado-placeholder');
+        const container = document.getElementById('resultado');
+
+        if (mensagem) {
+            placeholder.textContent = mensagem;
+        }
+
+        if (mostrarContainer) {
+            placeholder.style.display = 'none';
+            container.classList.add('is-visible');
+        } else {
+            placeholder.style.display = 'block';
+            container.classList.remove('is-visible');
+        }
     }
 
     window.onload = onLoad;
