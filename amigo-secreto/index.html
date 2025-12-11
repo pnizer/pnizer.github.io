@@ -7,7 +7,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Amigo Secreto</title>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" integrity="sha512-CNgIRecGo7nphbeZ04Sc13ka07paqdeTu0WR1IM4kNcpmBAUSHSQX0FslNhTDadL4O5SAGapGt4FodqL8My0mA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js" integrity="sha512-pUhApVQtLbnpLtJn6DuzDD5o2xtmLJnJ7oBoMsBnzOkVkpqofGLGPaBJ6ayD2zQe3lCgCibhJBi4cj5wAxwVKA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/3.0.3/jspdf.umd.min.js" integrity="sha512-+EeCylkt9WHJk5tGJxYdecHOcXFRME7qnbsfeMsdQL6NUPYm2+uGFmyleEqsmVoap/f3dN/sc3BX9t9kHXkHHg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.3.1/pdfobject.min.js" integrity="sha512-okdYHqKDXlxPqa15xRbGTv/Dg6TxskmMjtQWlIDMFbblo9/M2uPNowgmBuiDcGMfkE6pWtqPr9PuEWsTPyKWAw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
@@ -83,13 +83,11 @@
                 }
                 const rand = Math.floor(Math.random() * amigosMenosPessoa.length);
                 const amigoSecreto = amigosMenosPessoa[rand];
-                const qrcode = document.createElement('div');
-                new QRCode(qrcode, removerAcentos(amigoSecreto));
-                const img = qrcode.getElementsByTagName('img');
+                const qrcode = new QRious({value: removerAcentos(amigoSecreto)}).toDataURL();
                 resultado.push({
                     pessoa,
                     amigoSecreto,
-                    qrcode: img[0]
+                    qrcode
                 });
 
                 amigos = amigos.filter(amigo => amigo !== amigoSecreto);
@@ -99,15 +97,7 @@
             }
         }
 
-        setTimeout(function aguardarQrCodes() {
-            for (const r of resultado) {
-                if (!r.qrcode.src) {
-                    setTimeout(aguardarQrCodes, 100);
-                    return;
-                }
-            }
-            gerarPdf(resultado);
-        }, 100);
+        gerarPdf(resultado);
     }
 
     function gerarPdf(resultado) {
@@ -122,7 +112,7 @@
         let column = 0;
         for (let r of resultado) {
             doc.text(`${r.pessoa}:`, margin + columnWidth * column, y);
-            doc.addImage(r.qrcode.src, 'png', margin + columnWidth * column, y + lineHeight, qrcodeSize, qrcodeSize);
+            doc.addImage(r.qrcode, 'png', margin + columnWidth * column, y + lineHeight, qrcodeSize, qrcodeSize);
             y += boxHeight;
             count++;
 
